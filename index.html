@@ -436,14 +436,26 @@ input[type=range]{width:100%;margin-top:10px;accent-color:var(--c)}
 .wbox>div{background:var(--surface2);border-radius:13px;padding:9px 11px}
 .wbox small{display:block;color:var(--muted);font-size:12px}.wbox b{font-family:Cairo;font-size:17px}
 .ir .nm small.ms{display:block;font-size:12px;color:var(--muted);font-weight:500}
-.meq{font-family:Tajawal;font-weight:500;font-size:13.5px;color:var(--ink2);margin-right:6px}
+.meq{margin-top:8px;font-family:Cairo;font-weight:800;font-size:15px;color:var(--ink);background:color-mix(in srgb,var(--accent) 20%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:11px;padding:6px 12px;display:inline-block}
+.meq:empty{display:none}
+.mtab{display:grid;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.mtab-h,.mtab-r{display:grid;grid-template-columns:1.4fr .9fr 1.2fr;gap:8px;align-items:center;padding:10px 12px;text-align:right}
+.mtab-h{background:var(--surface2);font-size:12.5px;color:var(--muted);font-weight:700;padding:7px 12px}
+.mtab-r{border-top:1px solid var(--line);font-size:15px;transition:background .15s;width:100%}
+.mtab-r:hover{background:var(--surface2)}
+.mtab-r[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.mtab-r span{font-weight:700;color:var(--ink)}.mtab-r i{font-style:normal;margin-left:6px}
+.mtab-r b{font-family:Cairo;font-size:15px;color:var(--ink)}
+.mtab-r em{font-style:normal;font-weight:700;color:var(--c);font-size:14.5px}
+.mtab-n{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6}
 .ptabs{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
 .ptabs button{height:34px;padding:0 12px}
 .ptabs .mbt{font-family:Tajawal;font-weight:700;background:color-mix(in srgb,var(--c) 12%,var(--surface))}
-.mebox{margin-top:10px;font-size:13px;color:var(--ink2);line-height:1.7}
+.mebox{font-size:13px;color:var(--ink2);line-height:1.7}
 .mebox b{font-family:Cairo;color:var(--ink);margin-left:6px}
 .mi2{display:inline-block;background:var(--surface);border-radius:8px;padding:0 8px;margin:2px 0 2px 5px;white-space:nowrap}
-.x-me .mi2{background:#fff}
+.x-me .mi2{background:#fff;color:#1F2A24}
+.mi2 b{font-family:Cairo}
 .grab{display:none}
 /* picker / bottom menu */
 .pkscrim{z-index:70}
@@ -1197,10 +1209,12 @@ function drawSheet(){
  $('#sheet').innerHTML=`<div class="grab" aria-hidden="true"></div>
  <div class="sh-top"><img src="${f.img}" alt=""><div><span class="cat">${CATS[f.c]}</span><h2 id="shName">${esc(f.n)}</h2><div class="kcal"><span id="kc">${fmt(f.cal*r)}</span><small>سعرة في <span class="gv">${fmt(grams)}</span> ${U(f)}</small></div></div><button class="close" aria-label="إغلاق">×</button></div>
  <div class="sh-body">
-  <div class="portion" style="--i:0"><div class="pl"><span>احسب لحصتك: <b class="gv">${fmt(grams)}</b> ${f.ml?'مل':'غرام'} <span class="meq" id="meq">${measHTML(f,grams)}</span></span></div>
-  <div class="ptabs">${(f.me||[]).slice(0,3).map(([l,g])=>`<button data-g="${g}" class="mbt" aria-pressed="${g===grams}">1 ${esc(l)}</button>`).join('')}${[50,100,200].map(g=>`<button data-g="${g}" aria-pressed="${g===grams}">${g} ${U(f)}</button>`).join('')}</div>
+  <div class="portion" style="--i:0"><div class="pl"><span>احسب لحصتك: <b class="gv">${fmt(grams)}</b> ${f.ml?'مل':'غرام'}</span></div>
+  <div class="meq" id="meq">${measHTML(f,grams)}</div>
+  <div class="ptabs">${[50,100,150,200].map(g=>`<button data-g="${g}" aria-pressed="${g===grams}">${g} ${U(f)}</button>`).join('')}</div>
   <input type="range" min="5" max="500" step="5" value="${grams}" aria-label="وزن الحصة بالغرام">
-  ${f.me?`<div class="mebox"><b>📏 المقادير المنزلية</b><span>${measList(f)}</span></div>`:''}</div>
+  </div>
+  ${f.me?`<div class="mebox" style="--i:0"><div class="sec-t">📏 المقادير المنزلية</div>${measTable(f,grams)}</div>`:''}
   <div style="--i:1"><div class="sec-t">مِمَّ يتكوّن كل 100 ${f.ml?'مل':'غرام'}</div>
    <div class="comp"><span data-w="${f.pro}" style="width:0;background:var(--pro);--j:0"></span><span data-w="${f.fat}" style="width:0;background:var(--fat);--j:1"></span><span data-w="${oc}" style="width:0;background:var(--carb);--j:2"></span><span class="sg" data-w="${sug}" style="width:0;background-color:var(--sug);--j:3"></span><span data-w="${rest}" style="width:0;--j:4"></span></div>
    <div class="legend"><span><i style="background:var(--pro)"></i>بروتين <b>${fmt(f.pro)}</b>غ</span><span><i style="background:var(--fat)"></i>دهون <b>${fmt(f.fat)}</b>غ</span><span><i style="background:var(--carb)"></i>كربوهيدرات أخرى <b>${fmt(Math.round(oc*100)/100)}</b>غ</span><span><i style="background:var(--sug)"></i>سكريات <b>${fmt(f.sug)}</b>${f.sug==null?'':'غ'}</span><span><i style="background:var(--rest)"></i>ماء ومكونات أخرى <b>${fmt(Math.round(rest*10)/10)}</b>غ</span></div></div>
@@ -1222,7 +1236,7 @@ $('#sheet').addEventListener('click',e=>{
  if(e.target.closest('[data-scmp]')){toggleCmp(cur.id,$('#sheet .sh-top img'));drawSheet();render();return}
  const n=e.target.closest('[data-nav]');if(n&&!n.disabled){const L=list();const i=L.findIndex(x=>x.id===cur.id)+ +n.dataset.nav;if(L[i]){cur=L[i];drawSheet();$('#sheet').scrollTop=0}}
 });
-function updNums(){const f=cur,r=grams/100;const k=$('#kc');k._t=(k._t||0)+1;k.textContent=fmt(f.cal*r);document.querySelectorAll('#sheet .gv').forEach(s=>s.textContent=fmt(grams));const mq=$('#meq');if(mq)mq.innerHTML=measHTML(f,grams);
+function updNums(){const f=cur,r=grams/100;const k=$('#kc');k._t=(k._t||0)+1;k.textContent=fmt(f.cal*r);document.querySelectorAll('#sheet .gv').forEach(s=>s.textContent=fmt(grams));const mq=$('#meq');if(mq)mq.innerHTML=measHTML(f,grams);measTableUpd(f,grams);
  document.querySelectorAll('#sheet [data-k]').forEach(b=>{b._t=(b._t||0)+1;const v=f[b.dataset.k];b.textContent=v==null?'—':fmt(v*r)});
  document.querySelectorAll('#sheet [data-g]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.g===grams));
  const rg=$('#sheet input[type=range]');if(rg&&+rg.value!==grams)rg.value=grams}
@@ -1239,28 +1253,41 @@ let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on
 function render(){({cards:renderCards,rank:renderRank,table:renderTable,compare:renderCompare,plan:renderPlanForm})[st.view]()}
 /* ================= EXTRAS: measures · picker · export · nav · install ================= */
 /* ---- household measures ---- */
-function qtyStr(q){
+const FRW={.25:'ربع',.5:'نصف',.75:'ثلاثة أرباع'};
+function qtyParts(q){
  if(q<0.22)return null;
- if(q>=4)return String(Math.round(q));
+ if(q>=4)return {w:Math.round(q),fr:0};
  let w=Math.floor(q),fr=q-w,best=0,be=9;
  for(const v of [0,.25,.5,.75,1]){const e=Math.abs(fr-v);if(e<be){be=e;best=v}}
  if(best===1){w++;best=0}
- const sym={0:'',.25:'¼',.5:'½',.75:'¾'}[best];
- if(!w&&!sym)return null;
- return (w?String(w):'')+sym}
+ if(!w&&!best)return null;return {w,fr:best}}
+/* clear Arabic wording: "نصف كوب" · "1 كوب ونصف" · "3 ملعقة كبيرة" */
+function qtyWords(p,lab){
+ if(!p.w)return `${FRW[p.fr]} ${lab}`;
+ return `⁦${p.w}⁩ ${lab}${p.fr?' و'+FRW[p.fr]:''}`}
 function measureOf(f,g){
  const L=f&&f.me;if(!L||!L.length||!(g>0))return null;
- if(f.n==='البيض'){const n=Math.max(1,Math.round(g/50));return {q:String(n),lab:n>2&&n<11?'بيضات':'بيضة'}}
+ if(f.n==='البيض'){const n=Math.max(1,Math.round(g/50));const lab=n>2&&n<11?'بيضات':'بيضة';return {q:String(n),lab,text:`⁦${n}⁩ ${lab}`}}
  let pick=null;
  for(const [lab,mg] of L){const q=g/mg;if(q>=.5&&q<=6){pick=[lab,q];break}}
  if(!pick)for(const [lab,mg] of L){const q=g/mg;if(q>=.22&&q<=12){pick=[lab,q];break}}
  if(!pick)return null;
- const s=qtyStr(pick[1]);if(!s)return null;
- return {q:s,lab:pick[0]}}
-const ISO=s=>'\u2066'+s+'\u2069';
-const measHTML=(f,g)=>{const m=measureOf(f,g);return m?`نحو ${ISO(m.q)} ${esc(m.lab)}`:''};
-const measTxt=(f,g)=>{const m=measureOf(f,g);return m?`نحو ${ISO(m.q)} ${m.lab}`:''};
-const measList=f=>(f.me||[]).map(([l,g])=>`<span class="mi2">${esc(l)}: ${ISO(fmt(g))} ${U(f)}</span>`).join('');
+ const p=qtyParts(pick[1]);if(!p)return null;
+ return {q:String(p.w||''),lab:pick[0],text:qtyWords(p,pick[0])}}
+const ISO=s=>'⁦'+s+'⁩';
+const measHTML=(f,g)=>{const m=measureOf(f,g);return m?`≈ ${esc(m.text)} تقريبًا`:''};
+const measTxt=(f,g)=>{const m=measureOf(f,g);return m?`${m.text} تقريبًا`:''};
+const MICON=l=>/ملعقة/.test(l)?'🥄':/كوب|كأس|فنجان/.test(l)?'🥛':/حفنة/.test(l)?'✋':/حزمة/.test(l)?'🌿':/شريحة|قطعة|علبة|رغيف/.test(l)?'🍽️':'⚪';
+const measList=f=>(f.me||[]).map(([l,g])=>`<span class="mi2">${MICON(l)} ${esc(l)} = <b>${ISO(fmt(g))} ${U(f)==='مل'?'مل':'غرام'}</b></span>`).join('');
+/* table for the food sheet: each household measure, its weight, and how many fit the current portion */
+function measTable(f,g){
+ const L=f.me||[];if(!L.length)return '';
+ return `<div class="mtab"><div class="mtab-h"><span>المقدار المنزلي</span><span>وزنه</span><span>في حصتك</span></div>${L.map(([l,mg])=>{
+  const q=g/mg,p=q>=.22?qtyParts(q):null;const inP=f.n==='البيض'?`${Math.max(1,Math.round(g/50))} بيضة`:p?qtyWords(p,l):'أقل من ربع';
+  return `<button type="button" class="mtab-r" data-g="${mg}" aria-pressed="${Math.abs(mg-g)<.01}"><span><i>${MICON(l)}</i>1 ${esc(l)}</span><b>${ISO(fmt(mg))} ${U(f)}</b><em data-mq="${mg}">${esc(inP)}</em></button>`}).join('')}</div>
+  <div class="mtab-n">اضغط أي مقدار لحساب القيم الغذائية على أساسه · الملعقة الكبيرة 15 مل، والصغيرة 5 مل، والكوب 240 مل</div>`}
+function measTableUpd(f,g){document.querySelectorAll('#sheet [data-mq]').forEach(el=>{const mg=+el.dataset.mq,l=el.closest('.mtab-r').querySelector('span').textContent.replace(/^\S+1 /,'');const q=g/mg,p=q>=.22?qtyParts(q):null;el.textContent=f.n==='البيض'?`${Math.max(1,Math.round(g/50))} بيضة`:p?qtyWords(p,(f.me.find(m=>m[1]===mg)||[''])[0]):'أقل من ربع'});
+ document.querySelectorAll('#sheet .mtab-r').forEach(b=>b.setAttribute('aria-pressed',Math.abs(+b.dataset.g-g)<.01))}
 
 /* ---- bottom-sheet picker ---- */
 let pkRes=null;
@@ -1495,7 +1522,7 @@ function mealCard(i,anim){const s=PLAN.slots[i],r=s.r,m=s.m,n=k=>Math.round(r.nu
  <span class="rb">${tierDots(r.c)}<span>⏱ ${r.tm} د</span><span>${m===1?'حصة واحدة':`الحصة ×${m}`}</span>${alt}</span></span></button>
  <div class="mw"><span>⚖️ وزن الطبق ≈ <b>${fmt(W.ck)}</b> غ</span><small>المكونات نيئة ${fmt(W.raw)} غ</small></div>
  <div class="rmac"><span><i style="background:var(--pro)"></i>بروتين <b>${n('pro')}</b>غ</span><span><i style="background:var(--carb)"></i>كربوهيدرات <b>${n('carb')}</b>غ</span><span><i style="background:var(--fat)"></i>دهون <b>${n('fat')}</b>غ</span></div>
- <div class="ingc">${r.ing.slice(0,6).map(([a,g])=>{const f=gF(a),G=gr(g,m),ms=measureOf(f,G);return `<span>${esc(shortN(f.n))} <em>${ms?`${ISO(ms.q)} ${esc(ms.lab)}`:G+' غ'}</em></span>`}).join('')}${r.ing.length>6?`<span>+${r.ing.length-6}</span>`:''}</div>
+ <div class="ingc">${r.ing.slice(0,6).map(([a,g])=>{const f=gF(a),G=gr(g,m),ms=measureOf(f,G);return `<span>${esc(shortN(f.n))} <em>${ms?esc(ms.text):G+' غ'}</em></span>`}).join('')}${r.ing.length>6?`<span>+${r.ing.length-6}</span>`:''}</div>
  <div class="ract"><button class="btn sm" data-recipe="${i}">طريقة التحضير</button><button class="btn sm ghost" data-swap="${i}"><span class="ic">↻</span> بديل</button><button class="btn sm ghost icon" data-xmeal="${i}" aria-label="تصدير الوجبة">⇪</button></div>
 </article>`}
 function covRows(){const T=PLAN.T,S=planSums(),F=new Set(PLAN.p.goals.map(g=>GI[g].focus).filter(Boolean));
