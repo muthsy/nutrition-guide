@@ -135,6 +135,19 @@ th.nm{z-index:3}
 td.nm button{display:flex;align-items:center;gap:8px;font-weight:500;text-align:right}
 td.nm img{width:26px;height:26px}
 td.v{font-family:Cairo;font-weight:600}
+@media (max-width:759px){
+.tbl{border-radius:12px;max-height:calc(100vh - 230px);overflow:auto;-webkit-overflow-scrolling:touch}
+table{width:max-content;min-width:100%;font-size:13px}
+th,td{padding:6px 4px}
+th{top:0}
+th.nm,td.nm{width:84px;min-width:84px;max-width:84px;padding:6px 6px 6px 4px;box-shadow:-2px 0 6px rgba(0,0,0,.08)}
+td.nm button{gap:0;font-size:12px;line-height:1.3;white-space:normal;font-weight:600}
+td.nm img{display:none}
+th button{font-size:11.5px;padding:2px 2px}
+th button small{font-size:9.5px}
+th:not(.nm),td.v{min-width:56px}
+td.v{font-size:12.5px}
+}
 tr:hover td{filter:brightness(.97)}
 
 /* compare */
@@ -548,7 +561,7 @@ input[type=range]{width:100%;margin-top:10px;accent-color:var(--c)}
 .x-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:0 24px}
 .x-n{background:#F4F6F1;border-radius:10px;padding:6px 10px}
 .x-n span{display:block;font-size:12px;color:#4A564D}.x-n b{font-size:17px;font-weight:800}.x-n small{font-size:11px;color:#7A857C;font-weight:600}
-.x-me{margin:12px 24px 0;font-size:13px;color:#4A564D;background:#FBF1DC;border-radius:10px;padding:8px 12px}.x-me b{color:#1F2A24}
+.mtab-ck{margin-top:10px;background:var(--surface);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.6}.mtab-r small{font-size:11px;color:var(--muted);font-weight:500}.x-ck{margin-top:6px;font-weight:600;color:#1F2A24}.x-me{margin:12px 24px 0;font-size:13px;color:#4A564D;background:#FBF1DC;border-radius:10px;padding:8px 12px}.x-me b{color:#1F2A24}
 .x-bh{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 24px 0}
 .x-bh>div{border-radius:12px;padding:8px 12px}.x-bh h4{font-size:14.5px;font-weight:800;margin-bottom:2px}
 .x-bh ul{list-style:none;font-size:13px;line-height:1.55}.x-bh li::before{content:"• ";opacity:.6}
@@ -615,7 +628,7 @@ input[type=range]{width:100%;margin-top:10px;accent-color:var(--c)}
 <main class="wrap">
  <section class="view" id="v-cards"><div class="vh"><h2>كل الأصناف</h2><p id="cardsInfo"></p></div><div class="grid" id="grid"></div></section>
  <section class="view" id="v-rank" hidden><div class="vh"><h2 id="rankTitle"></h2><p>اضغط على أي صنف لعرض تفاصيله</p></div><div class="nuts-sel" id="rankSel"></div><div class="rank" id="rank"></div></section>
- <section class="view" id="v-table" hidden><div class="vh"><h2>الجدول الكامل</h2><p>اضغط على عنوان أي عمود للترتيب. اللون الأغمق يعني قيمة أعلى ضمن العمود.</p></div><div class="tbl"><table id="tbl"></table></div></section>
+ <section class="view" id="v-table" hidden><div class="vh"><h2>الجدول الكامل</h2><p>اضغط على عنوان أي عمود للترتيب. اللون الأغمق يعني قيمة أعلى. مرّر الجدول يمينًا ويسارًا لرؤية بقية الأعمدة.</p></div><div class="tbl"><table id="tbl"></table></div></section>
  <section class="view" id="v-plan" hidden>
   <div class="vh"><h2>النظام الغذائي المخصص</h2><p>أدخل بياناتك واختر هدفك وميزانيتك، ونقترح لك يومًا كاملًا من وجبات عربية مع طريقة تحضيرها</p></div>
   <div class="pform" id="pform">
@@ -1273,20 +1286,26 @@ function measureOf(f,g){
  if(!pick)for(const [lab,mg] of L){const q=g/mg;if(q>=.22&&q<=12){pick=[lab,q];break}}
  if(!pick)return null;
  const p=qtyParts(pick[1]);if(!p)return null;
- return {q:String(p.w||''),lab:pick[0],text:qtyWords(p,pick[0])}}
+ const sn=stateOf(f);return {q:String(p.w||''),lab:pick[0],text:qtyWords(p,pick[0])+(sn?' ('+sn+')':'')}}
 const ISO=s=>'⁦'+s+'⁩';
+/* state of the food the per-100g values refer to */
+const DRYN=/جاف|المجفف|الشوفان|المعكرونة|الطحين|الفريكة|البرغل/;
+const stateOf=f=>f.ck&&f.ck>1?'جاف':f.ck?'نيّئ':DRYN.test(f.n)?'جاف':'';
+/* grams of one COOKED cup (USDA) for dry grains / legumes */
+const CC={'الأرز (أبيض جاف)':158,'أرز الكبسة البسمتي (جاف)':158,'البرغل (جاف)':182,'العدس (جاف)':198,'الفاصولياء (بيضاء جافة)':179,'الحمص (جاف)':164,'الفول (المجفف)':170,'الشعير (مقشور جاف)':157,'الفريكة (جافة)':160,'المعكرونة (جافة)':140,'الشوفان':234};
+function cookedLine(f,g){const c=CC[f.n];if(!c||!f.ck)return '';const cg=g*f.ck,q=cg/c,p=qtyParts(q);return `بعد الطبخ: ${ISO(fmt(g))} غ جاف ≈ ${ISO(fmt(cg))} غ مطبوخ ≈ ${p?qtyWords(p,'كوب مطبوخ'):'أقل من ربع كوب مطبوخ'}`}
 const measHTML=(f,g)=>{const m=measureOf(f,g);return m?`≈ ${esc(m.text)} تقريبًا`:''};
 const measTxt=(f,g)=>{const m=measureOf(f,g);return m?`${m.text} تقريبًا`:''};
 const MICON=l=>/ملعقة/.test(l)?'🥄':/كوب|كأس|فنجان/.test(l)?'🥛':/حفنة/.test(l)?'✋':/حزمة/.test(l)?'🌿':/شريحة|قطعة|علبة|رغيف/.test(l)?'🍽️':'⚪';
-const measList=f=>(f.me||[]).map(([l,g])=>`<span class="mi2">${MICON(l)} ${esc(l)} = <b>${ISO(fmt(g))} ${U(f)==='مل'?'مل':'غرام'}</b></span>`).join('');
+const measList=f=>(f.me||[]).map(([l,g])=>`<span class="mi2">${MICON(l)} ${esc(l)}${stateOf(f)?' '+stateOf(f):''} = <b>${ISO(fmt(g))} ${U(f)==='مل'?'مل':'غرام'}</b></span>`).join('');
 /* table for the food sheet: each household measure, its weight, and how many fit the current portion */
 function measTable(f,g){
  const L=f.me||[];if(!L.length)return '';
  return `<div class="mtab"><div class="mtab-h"><span>المقدار المنزلي</span><span>وزنه</span><span>في حصتك</span></div>${L.map(([l,mg])=>{
   const q=g/mg,p=q>=.22?qtyParts(q):null;const inP=f.n==='البيض'?`${Math.max(1,Math.round(g/50))} بيضة`:p?qtyWords(p,l):'أقل من ربع';
-  return `<button type="button" class="mtab-r" data-g="${mg}" aria-pressed="${Math.abs(mg-g)<.01}"><span><i>${MICON(l)}</i>1 ${esc(l)}</span><b>${ISO(fmt(mg))} ${U(f)}</b><em data-mq="${mg}">${esc(inP)}</em></button>`}).join('')}</div>
-  <div class="mtab-n">اضغط أي مقدار لحساب القيم الغذائية على أساسه · الملعقة الكبيرة 15 مل، والصغيرة 5 مل، والكوب 240 مل</div>`}
-function measTableUpd(f,g){document.querySelectorAll('#sheet [data-mq]').forEach(el=>{const mg=+el.dataset.mq,l=el.closest('.mtab-r').querySelector('span').textContent.replace(/^\S+1 /,'');const q=g/mg,p=q>=.22?qtyParts(q):null;el.textContent=f.n==='البيض'?`${Math.max(1,Math.round(g/50))} بيضة`:p?qtyWords(p,(f.me.find(m=>m[1]===mg)||[''])[0]):'أقل من ربع'});
+  return `<button type="button" class="mtab-r" data-g="${mg}" aria-pressed="${Math.abs(mg-g)<.01}"><span><i>${MICON(l)}</i>1 ${esc(l)}${stateOf(f)?` <small>(${stateOf(f)})</small>`:''}</span><b>${ISO(fmt(mg))} ${U(f)}</b><em data-mq="${mg}">${esc(inP)}</em></button>`}).join('')}</div>
+  ${cookedLine(f,g)?`<div class="mtab-ck" id="ckl">🍚 ${cookedLine(f,g)}</div>`:''}<div class="mtab-n">اضغط أي مقدار لحساب القيم الغذائية على أساسه · الملعقة الكبيرة 15 مل، والصغيرة 5 مل، والكوب 240 مل</div>`}
+function measTableUpd(f,g){const ck=document.getElementById('ckl');if(ck)ck.innerHTML='🍚 '+cookedLine(f,g);document.querySelectorAll('#sheet [data-mq]').forEach(el=>{const mg=+el.dataset.mq,l=el.closest('.mtab-r').querySelector('span').textContent.replace(/^\S+1 /,'');const q=g/mg,p=q>=.22?qtyParts(q):null;el.textContent=f.n==='البيض'?`${Math.max(1,Math.round(g/50))} بيضة`:p?qtyWords(p,(f.me.find(m=>m[1]===mg)||[''])[0]):'أقل من ربع'});
  document.querySelectorAll('#sheet .mtab-r').forEach(b=>b.setAttribute('aria-pressed',Math.abs(+b.dataset.g-g)<.01))}
 
 /* ---- bottom-sheet picker ---- */
@@ -1377,7 +1396,7 @@ function xFood(f,g){
   <div class="x-bar"><span style="width:${f.pro}%;background:#2E6F95"></span><span style="width:${f.fat}%;background:#E3A72F"></span><span style="width:${oc}%;background:#7FAF5B"></span><span style="width:${sug}%;background:#D2476B"></span><span style="width:${rest}%;background:#E3E7E0"></span></div>
   <div class="x-leg"><span><i style="background:#2E6F95"></i>بروتين</span><span><i style="background:#E3A72F"></i>دهون</span><span><i style="background:#7FAF5B"></i>كربوهيدرات</span><span><i style="background:#D2476B"></i>سكريات</span><span><i style="background:#E3E7E0"></i>ماء وغيره</span><em>تركيب كل 100 ${U(f)}</em></div>
   <div class="x-sec">العناصر الغذائية في ${fmt(g)} ${U(f)}</div><div class="x-grid">${nut}</div>
-  ${f.me?`<div class="x-me"><b>المقادير المنزلية:</b> ${measList(f)}</div>`:''}
+  ${f.me?`<div class="x-me"><b>المقادير المنزلية${stateOf(f)?' (للصنف '+stateOf(f)+' قبل الطبخ)':''}:</b> ${measList(f)}${cookedLine(f,100)?`<div class="x-ck">${cookedLine(f,100)}</div>`:''}</div>`:''}
   <div class="x-bh"><div class="x-ben"><h4>✓ الفوائد</h4><ul>${f.ben.split('؛').map(s=>`<li>${esc(s.trim())}</li>`).join('')}</ul></div><div class="x-harm"><h4>! تنبيهات وأضرار</h4><ul>${f.harm.split('؛').map(s=>`<li>${esc(s.trim())}</li>`).join('')}</ul></div></div>
   <div class="x-ex"><b>مركبات بارزة:</b> ${bidi(f.x)}</div>
   ${XFOOT()}</div>`)}
